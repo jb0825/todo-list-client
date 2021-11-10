@@ -1,25 +1,60 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import { nanoid } from "nanoid";
+import Form from "./components/Form";
+import Filter from "./components/Filter";
+import Todo from "./components/Todo";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+function App () {
+    const [tasks, setTasks] = useState([]);
+
+    function addTask (name) {
+        setTasks([...tasks, {id: "task-" + nanoid(), name: name, completed: false}]);
+    }
+
+    function deleteTask (id) {
+        const newTasks = tasks.filter(task => id !== task.id);
+        setTasks(newTasks);
+    }
+
+    function updateTask (id, name) {
+        const newTask = tasks.map(task => {
+            if (id === task.id) return {...task, name: name}
+            return task;
+        });
+        setTasks(newTask);
+    }
+
+    function toggleCompleted (id) {
+        const newTasks = tasks.map(task => {
+            if (id === task.id) return {...task, completed: !task.completed}
+            return task;
+        });
+        setTasks(newTasks);
+    }
+
+    return (
+        <div className="App">
+            <h3>What needs to be done?</h3>
+            <Form addTask={addTask}/>
+            <Filter/>
+
+            <h3>{tasks.length} {tasks.length > 1 ? 'tasks' : 'task'} remaining</h3>
+
+            <ul>
+                {tasks.map((task, idx) =>
+                    <Todo
+                        name={task.name}
+                        id={task.id}
+                        completed={task.completed}
+                        key={idx}
+                        updateTask={updateTask}
+                        deleteTask={deleteTask}
+                        toggleCompleted={toggleCompleted}
+                    />
+                )}
+            </ul>
+        </div>
+    );
 }
 
 export default App;
