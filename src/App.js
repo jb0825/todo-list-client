@@ -6,6 +6,13 @@ import Todo from "./components/Todo";
 
 function App () {
     const [tasks, setTasks] = useState([]);
+    const [taskFilter, setTaskFilter] = useState("All");
+
+    const FILTER = {
+        All: () => true,
+        Active: task => !task.completed,
+        Completed: task => task.completed
+    }
 
     function addTask (name) {
         setTasks([...tasks, {id: "task-" + nanoid(), name: name, completed: false}]);
@@ -36,12 +43,14 @@ function App () {
         <div className="App">
             <h3>What needs to be done?</h3>
             <Form addTask={addTask}/>
-            <Filter/>
+            <Filter updateFilter={setTaskFilter}/>
 
             <h3>{tasks.length} {tasks.length > 1 ? 'tasks' : 'task'} remaining</h3>
 
             <ul>
-                {tasks.map((task, idx) =>
+                {tasks
+                    .filter(FILTER[taskFilter])
+                    .map((task, idx) =>
                     <Todo
                         name={task.name}
                         id={task.id}
