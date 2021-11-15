@@ -6,6 +6,7 @@ import Todo from "./components/Todo";
 
 function App () {
     // 커밋왜안됨? 커밋왜안됨? 커밋왜안됨?
+    // 커밋왜안됨? 커밋왜안됨? 커밋왜안됨?
     const [tasks, setTasks] = useState([]);
     const [taskFilter, setTaskFilter] = useState("All");
 
