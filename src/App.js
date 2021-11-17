@@ -1,42 +1,42 @@
-import { useState } from "react";
-import { nanoid } from "nanoid";
+import {useState} from "react";
+import axios from "axios";
 import Form from "./components/Form";
 import Filter from "./components/Filter";
-import Todo from "./components/Todo";
+import TodoList from "./components/TodoList";
 
-function App () {
+function App() {
     const [tasks, setTasks] = useState([]);
     const [taskFilter, setTaskFilter] = useState("All");
 
-    const FILTER = {
-        All: () => true,
-        Active: task => !task.completed,
-        Completed: task => task.completed
+    function getTasks() {
+        axios.get("/tasks")
+            .then((resp) => {
+                let data = [];
+                resp.data.map(d => data.push(d))
+                setTasks([...data]);
+            })
+            .catch((err) => {
+                console.log(err);
+                setTasks([]);
+            });
     }
 
-    function addTask (name) {
-        setTasks([...tasks, {id: "task-" + nanoid(), name: name, completed: false}]);
+    function addTask(name) {
+        axios.post("/task", {name})
+            .then(() => { getTasks() })
+            .catch((err) => { console.log(err) })
     }
 
-    function deleteTask (id) {
-        const newTasks = tasks.filter(task => id !== task.id);
-        setTasks(newTasks);
+    function deleteTask(id) {
+        axios.delete(`/task/${id}`)
+            .then(() => { getTasks() })
+            .catch((err) => { console.log(err) });
     }
 
-    function updateTask (id, name) {
-        const newTask = tasks.map(task => {
-            if (id === task.id) return {...task, name: name}
-            return task;
-        });
-        setTasks(newTask);
-    }
-
-    function toggleCompleted (id) {
-        const newTasks = tasks.map(task => {
-            if (id === task.id) return {...task, completed: !task.completed}
-            return task;
-        });
-        setTasks(newTasks);
+    function updateTask(id, name, completed) {
+        axios.patch(`/task/${id}`, {name, completed})
+            .then(() => { getTasks() })
+            .catch((err) => { console.log(err) });
     }
 
     return (
@@ -47,21 +47,13 @@ function App () {
 
             <h3>{tasks.length} {tasks.length > 1 ? 'tasks' : 'task'} remaining</h3>
 
-            <ul>
-                {tasks
-                    .filter(FILTER[taskFilter])
-                    .map((task, idx) =>
-                    <Todo
-                        name={task.name}
-                        id={task.id}
-                        completed={task.completed}
-                        key={idx}
-                        updateTask={updateTask}
-                        deleteTask={deleteTask}
-                        toggleCompleted={toggleCompleted}
-                    />
-                )}
-            </ul>
+            <TodoList
+                tasks={tasks}
+                taskFilter={taskFilter}
+                getTasks={getTasks}
+                updateTask={updateTask}
+                deleteTask={deleteTask}
+            />
         </div>
     );
 }
